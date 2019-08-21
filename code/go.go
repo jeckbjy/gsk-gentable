@@ -3,6 +3,7 @@ package code
 import (
 	"bytes"
 	"fmt"
+	"gentable/code/gotpl"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -50,7 +51,12 @@ func (b *GoBuilder) toType(types []*base.Type) []string {
 			t1 := b.toBaseType(t.T1)
 			t2 := b.toBaseType(t.T2)
 			results[i] = fmt.Sprintf("map[%s]%s", t1, t2)
+		case base.TYPE_DATE:
+			results[i] = "Time"
+		case base.TYPE_WEEK:
+			results[i] = "Week"
 		case base.TYPE_ENUM:
+			results[i] = b.toBaseType(base.TYPE_INT)
 		default:
 			results[i] = b.toBaseType(t.T0)
 		}
@@ -64,7 +70,7 @@ func (b *GoBuilder) getTableTemplate() (*template.Template, error) {
 	b.mux.Lock()
 	defer b.mux.Unlock()
 	if b.tpl == nil {
-		tpl, err := template.New("gotpl").Parse(goTableTpl)
+		tpl, err := template.New("gotpl").Parse(gotpl.TplTable)
 		if err != nil {
 			return nil, base.Error(err)
 		}
@@ -175,7 +181,7 @@ func (b *GoBuilder) BuildAll(sheets []*base.Sheet, dtype string, opts *Options) 
 	}
 
 	// 只会用一次,不需要cache
-	tpl, err := template.New("gomgr").Parse(goManagerTpl)
+	tpl, err := template.New("gomgr").Parse(gotpl.TplManager)
 	if err != nil {
 		return base.Error(err)
 	}
@@ -189,7 +195,7 @@ func (b *GoBuilder) buildLib(dtype string, opts *Options) error {
 
 	buf := bytes.Buffer{}
 	buf.WriteString(pkg)
-	buf.WriteString(goLibComm)
+	buf.WriteString(gotpl.LibComm)
 	outfile := outFile(dtype, "go", "zzlib.go")
 	_ = ioutil.WriteFile(outfile, buf.Bytes(), os.ModePerm)
 
@@ -198,9 +204,9 @@ func (b *GoBuilder) buildLib(dtype string, opts *Options) error {
 	tag := b.toTag(dtype)
 	switch tag {
 	case "json":
-		buf.WriteString(goLibJson)
+		buf.WriteString(gotpl.LibJson)
 	case "csv":
-		buf.WriteString(goLibCsv)
+		buf.WriteString(gotpl.LibCsv)
 	default:
 		return fmt.Errorf("not support, %+v", dtype)
 	}

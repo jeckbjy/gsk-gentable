@@ -13,7 +13,7 @@ generate csv,tsv,json and code for golang from xlsx sheet
   - 支持csv,tsv
   - json,value全部都是字符类型
 - 代码输出:
-  - 支持golang,可指定Package名字
+  - 支持golang,可指定Package名字,要求go版本至少1.9,使用了type alias功能
 - 表头格式:
   - 第一行名字,第二行类型,第三行注释
 - 支持相同列名合并成一个数组,
@@ -39,4 +39,5 @@ output
 
 - 更多语言的支持
 - 详细的日志信息
+- ENUM支持
 - LIST添加Filter功能,用于累加该列数据或者新定义一种类型(RLIST,RandList),该功能通常用于概率随机

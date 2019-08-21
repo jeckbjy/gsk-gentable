@@ -1,6 +1,6 @@
-package code
+package gotpl
 
-const goTableTpl = `
+const TplTable = `
 {{ $ClassTbl := printf "%sTbl" .Class -}}
 package {{.Package}}
 
@@ -58,67 +58,6 @@ func (t *{{$ClassTbl}}) Load(data []byte) error {
 		t.dict[v.{{.IDName}}] = v
 	}
 	{{- end}}
-
-	return nil
-}
-`
-
-// 加载表格,支持加载全部,加载单个
-// 支持从内存加载,支持从文件加载
-const goManagerTpl = `
-package {{.Package}}
-
-import (
-	"fmt"
-	"io/ioutil"
-	"path"
-)
-
-const (
-{{- range .Sheets}}
-	{{.AlignKey}} = "{{.Name}}"
-{{- end}}
-)
-
-func init() {
-	{{- range .Sheets}}
-	add(&{{.Name}}Tbl{})
-	{{- end}}
-}
-
-var gTableMap = make(map[string]ITable)
-
-type ITable interface {
-	Version() int
-	Name() string
-	File() string
-	Load(data []byte) error
-}
-
-func add(tbl ITable) {
-	gTableMap[tbl.Name()] = tbl
-}
-
-func GetTable(name string) ITable {
-	return gTableMap[name]
-}
-
-func LoadFromFile(basedir string) error {
-	errors := ""
-	for _, t := range gTableMap {
-		filename := path.Join(basedir, t.File())
-		data, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return err
-		}
-		if err := t.Load(data); err != nil {
-			errors += err.Error()
-		}
-	}
-
-	if len(errors) != 0 {
-		return fmt.Errorf("%s", errors)
-	}
 
 	return nil
 }
